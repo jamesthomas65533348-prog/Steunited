@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STE UNITED - Admin</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FFD700">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"@supabase/supabase-js":"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"}}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;font-family:'Inter',sans-serif}
+body{background:#050505;color:#fff;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;background:url('background.png') center/40% no-repeat;opacity:0.06;z-index:-1}
+input,textarea{user-select:text}
+.island{backdrop-filter:blur(24px) saturate(180%);background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);border-radius:100px}
+.island-gold{background:linear-gradient(135deg, rgba(255,215,0,0.18), rgba(255,193,7,0.08));border:1px solid rgba(255,215,0,0.35);color:#FFD700}
+.header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;max-width:480px;margin:0 auto}
+.header-left{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.logo-badge{width:30px;height:30px;border-radius:50%;background:#0a0a0a;border:1.5px solid rgba(255,215,0,0.5);overflow:hidden}
+.logo-badge img{width:100%;height:100%;object-fit:cover}
+.container{max-width:480px;margin:0 auto;padding:70px 14px 110px}
+.tab-content{display:none}.tab-content.active{display:block}
+.glass-card{backdrop-filter:blur(28px);background:rgba(18,18,18,0.78);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:14px;margin-bottom:12px}
+.btn{padding:12px 16px;border-radius:14px;border:none;font-weight:700;cursor:pointer;font-size:13px}
+.btn-gold{background:linear-gradient(135deg,#FFD700,#FFC107);color:#000}
+.btn-dark{background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.12)}
+.btn-red{background:rgba(255,90,90,0.15);color:#ff7a7a;border:1px solid rgba(255,90,90,0.2)}
+.input{width:100%;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;outline:none;margin-bottom:10px}
+.players-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.approve-card{display:flex;gap:12px;align-items:center}
+.approve-card img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,215,0,0.3)}
+.rating-slider{width:100%;accent-color:#FFD700}
+.board{width:100%;aspect-ratio:3/4.6;background:linear-gradient(180deg,#0a1f0a,#123212);border-radius:24px;position:relative;border:1px solid rgba(255,255,255,0.12);overflow:hidden}
+.board::before{content:"";position:absolute;inset:10px;border:1.5px solid rgba(255,255,255,0.22);border-radius:16px}
+.placeholder{position:absolute;transform:translate(-50%,-50%);width:58px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;z-index:3;transition:0.2s}
+.placeholder-circle{width:48px;height:48px;border-radius:50%;border:2px dashed rgba(255,215,0,0.6);background:rgba(0,0,0,0.35);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:0.2s}
+.placeholder-circle.filled{border-style:solid;border-color:#fff;background:#1a1a1a;box-shadow:0 0 15px rgba(255,215,0,0.3)}
+.placeholder-label{font-size:9px;font-weight:800;background:rgba(0,0,0,0.7);padding:2px 7px;border-radius:100px;border:1px solid rgba(255,255,255,0.15)}
+.placeholder img{width:100%;height:100%;object-fit:cover}
+.sub-bench{display:flex;gap:8px;overflow-x:auto;padding:10px 2px}
+.sub-slot{min-width:74px;height:86px;border-radius:18px;border:2px dashed rgba(255,215,0,0.45);background:rgba(255,255,255,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;flex-shrink:0;transition:0.2s}
+.sub-slot.filled{border-style:solid;border-color:#FFD700;background:rgba(255,215,0,0.12);box-shadow:0 0 10px rgba(255,215,0,0.2)}
+.sub-slot img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.mode-switch{display:flex;gap:6px;margin-top:10px}
+.mode-btn{flex:1;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;font-size:11px;font-weight:800}
+.mode-btn.active{background:#FFD700;color:#000;border-color:#FFD700}
+.drag-card{position:relative;padding:8px 10px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:8px;cursor:pointer;transition:0.25s}
+.drag-card.selected{border-color:#FFD700;background:rgba(255,215,0,0.15);box-shadow:0 0 15px rgba(255,215,0,0.25)}
+.drag-card.used{opacity:0.28;filter:blur(0.8px) grayscale(0.6);pointer-events:none;transform:scale(0.92)}
+.drag-card.used::after{content:"USED";position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:8px;font-weight:800;background:#FFD700;color:#000;padding:2px 6px;border-radius:100px}
+.drag-card img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.bottom-nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:6px;padding:7px;background:rgba(15,15,15,0.88);backdrop-filter:blur(30px);border:1px solid rgba(255,255,255,0.12);border-radius:100px;z-index:30}
+.tab-btn{min-width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tab-btn.active{background:linear-gradient(135deg,#FFD700,#FFC107)}
+.tab-btn.active svg{stroke:#000}
+.popup-wrap{position:fixed;top:14px;left:0;right:0;display:flex;justify-content:center;z-index:100;pointer-events:none}
+.popup{transform:translateY(-120px) scale(0.9);opacity:0;padding:12px 18px;border-radius:100px;display:flex;gap:10px;backdrop-filter:blur(25px);background:rgba(30,30,30,0.75);border:1px solid rgba(255,255,255,0.18);transition:.55s cubic-bezier(0.175,0.885,0.32,1.275);font-size:13px}
+.popup.show{transform:translateY(0) scale(1);opacity:1}
+.select-btn{width:100%;padding:14px 16px;border-radius:14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.select-dropdown{position:absolute;top:108%;left:0;right:0;background:rgba(22,22,22,0.98);border:1px solid rgba(255,255,255,0.12);border-radius:18px;padding:6px;z-index:50;display:none;max-height:200px;overflow:auto}
+.select-dropdown.show{display:block}
+.select-option{padding:12px 14px;border-radius:10px;font-size:13px}
+.confirm-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(12px);z-index:80;display:none;align-items:center;justify-content:center;padding:20px}
+.confirm-bg.show{display:flex}
+.confirm-card{width:100%;max-width:340px;border-radius:24px;padding:20px;background:rgba(22,22,22,0.9);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(30px);transform:scale(0.85);transition:0.35s cubic-bezier(0.175,0.885,0.32,1.275)}
+.confirm-bg.show.confirm-card{transform:scale(1)}
+.jersey-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.jersey-input{width:70px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,215,0,0.25);color:#FFD700;font-weight:800;text-align:center;outline:none}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#ff4d4d;box-shadow:0 0 8px #ff4d4d;animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:0.7}}
+</style>
+</head>
+<body>
+<div class="popup-wrap"><div class="popup" id="popup"><div style="width:8px;height:8px;border-radius:50%;background:#FFD700"></div><span id="popupText"></span></div></div>
+
+<div class="confirm-bg" id="confirmBg" onclick="if(event.target===this)closeConfirm(false)">
+  <div class="confirm-card">
+    <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <h3 id="confirmTitle" style="text-align:center;font-size:15px;font-weight:800">Confirm Action</h3>
+    <p id="confirmMsg" style="text-align:center;font-size:12px;opacity:0.6;margin:8px 0 18px;line-height:1.5"></p>
+    <div style="display:flex;gap:8px"><button class="btn btn-dark" style="flex:1" onclick="closeConfirm(false)">Cancel</button><button class="btn btn-gold" style="flex:1" id="confirmYesBtn">Yes, Continue</button></div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="island header-left" onclick="location.href='index.html'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></div>
+  <div class="island island-gold" style="display:flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;font-weight:800;font-size:12px"><div class="logo-badge"><img src="background.png"></div>ADMIN • <span id="formationText">4-3-3</span> <div class="live-dot" style="margin-left:6px"></div></div>
+  <div class="island header-left" style="font-size:10px;font-weight:700" id="totalBadge">0</div>
+</div>
+
+<div class="container">
+  <div class="tab-content active" id="tab1"><div style="display:flex;justify-content:space-between;align-items:center;margin:4px 4px 10px"><h3 style="font-size:14px;opacity:.7">PENDING</h3><div style="font-size:10px;opacity:.5">🔔 Push active</div></div><div id="pendingList" class="players-grid"></div></div>
+  <div class="tab-content" id="tab2"><div class="glass-card"><textarea id="announceInput" class="input" placeholder="Training today at mass com field"></textarea><button class="btn btn-gold" style="width:100%" id="postAnnounce">Post Announcement</button><div style="font-size:11px;opacity:.5;margin-top:8px">Only 1 live message allowed</div></div><div id="announceList"></div></div>
+  <div class="tab-content" id="tab3"><h3 style="font-size:14px;margin:4px 4px 10px;opacity:.7">RATE • NUMBER • INJURY</h3><div id="ratingList" class="players-grid"></div></div>
+  <div class="tab-content" id="tab4">
+    <div class="glass-card">
+      <div style="position:relative"><div class="select-btn" id="formationSelectBtn"><span id="formationText2">Select Formation</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="select-dropdown" id="formationDrop"></div></div>
+      <div id="selectedPlayerInfo" style="display:none;margin-top:12px;padding:10px;border-radius:14px;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.25);font-size:12px;align-items:center;gap:8px"><img id="selImg" style="width:30px;height:30px;border-radius:50%"><span id="selName">Select player then tap placeholder</span></div>
+      <div class="mode-switch"><button class="mode-btn active" id="modeXI">XI - Starting</button><button class="mode-btn" id="modeSUB">SUBS - Bench</button></div>
+      <div style="display:flex;gap:6px;margin-top:10px"><button class="btn btn-dark" style="flex:1" id="clearBoard">Clear</button><button class="btn btn-gold" style="flex:1" id="saveLineup">Save Lineup</button></div>
+    </div>
+    <div class="board" id="formationBoard"></div>
+    <h4 style="margin:16px 4px 8px;font-size:12px;opacity:.7">SUBSTITUTES BENCH (7 Slots)</h4>
+    <div class="sub-bench" id="subsBench"></div>
+    <h4 style="margin:14px 4px 8px;font-size:12px;opacity:.6">TAP PLAYER → TAP PLACEHOLDER • USED = BLURRED</h4>
+    <div id="dragPlayers" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
+  <div class="tab-content" id="tab5"><div class="glass-card" style="text-align:center"><div class="logo-badge" style="width:70px;height:70px;margin:0 auto 12px"><img src="background.png"></div><h2>STE UNITED</h2>
+  <div style="padding:10px;border-radius:14px;background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.15);margin:12px 0;text-align:left"><div style="font-size:12px;font-weight:700">Admin Push Notifications</div><div style="font-size:10px;opacity:0.6">You get notified when new player registers pending, even when browser closed</div><div id="adminNotifStatus" style="font-size:10px;margin-top:6px;opacity:0.5">Checking...</div><button id="enableAdminPush" class="btn btn-gold" style="width:100%;margin-top:8px;padding:10px;font-size:12px">Enable Admin Push</button></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px"><div style="padding:14px;border-radius:16px;background:rgba(255,215,0,0.1)"><div style="font-size:22px;font-weight:800" id="statApproved">0</div><div style="font-size:11px;opacity:.6">APPROVED</div></div><div style="padding:14px;border-radius:16px;background:rgba(255,255,255,0.05)"><div style="font-size:22px;font-weight:800" id="statPending">0</div><div style="font-size:11px;opacity:.6">PENDING</div></div></div><button class="btn btn-dark" style="width:100%;margin-top:14px" onclick="localStorage.removeItem('ste_user');location.href='auth.html'">Logout</button></div></div>
+</div>
+
+<div class="bottom-nav">
+  <div class="tab-btn active" data-tab="tab1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+  <div class="tab-btn" data-tab="tab2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><path d="M12 2a3 3 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></div>
+  <div class="tab-btn" data-tab="tab3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+  <div class="tab-btn" data-tab="tab4"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><path d="M12 2a15.3 0 0 1 4 10 15.3 0 0 1-4 10 15.3 0 0 1-4-10 15.3 0 0 1 4-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+  <div class="tab-btn" data-tab="tab5"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8"><circle cx="12" cy="12" r="3"/></svg></div>
+</div>
+
+<script>
+// PWA + ADMIN PUSH
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js') }
+let adminSW=null
+async function initAdminPush(){
+  if('serviceWorker' in navigator){
+    try{ adminSW=await navigator.serviceWorker.ready }catch(e){}
+  }
+  updateAdminNotifUI()
+  // auto ask admin after 2s
+  setTimeout(async ()=>{
+    if(Notification.permission==='default'){
+      const perm=await Notification.requestPermission()
+      updateAdminNotifUI()
+    }
+  },2000)
+}
+function updateAdminNotifUI(){
+  const el=$("adminNotifStatus"), btn=$("enableAdminPush")
+  if(Notification.permission==='granted'){ el.textContent='✅ Admin push active - works even when closed'; el.style.color='#4CAF50'; btn.textContent='Enabled ✓' }
+  else if(Notification.permission==='denied'){ el.textContent='❌ Blocked in browser settings'; btn.textContent='Blocked' }
+  else{ el.textContent='Tap Enable to get pending alerts'; btn.textContent='Enable Admin Push' }
+}
+async function enableAdminPush(){
+  const perm=await Notification.requestPermission()
+  updateAdminNotifUI()
+  if(perm==='granted'){
+    if(adminSW) adminSW.showNotification('STE UNITED ADMIN', {body:'Admin push enabled - new pending players will notify you', icon:'background.png', badge:'background.png'})
+  }
+}
+$("enableAdminPush").onclick=enableAdminPush
+initAdminPush()
+function adminPush(title, body){
+  if(Notification.permission!=='granted') return
+  if(adminSW){ adminSW.showNotification(title, {body, icon:'background.png', badge:'background.png', vibrate:[200,100,200]}) }
+  else{ new Notification(title, {body, icon:'background.png'}) }
+}
+</script>
+
+<script type="module">
+import { createClient } from '@supabase/supabase-js'
+const supabase = createClient("https://shkrzfssaqsbjltqsqfs.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoa3J6ZnNzYXFzYmpsdHFzcWZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUwMDQ0MDQsImV4cCI6MjEwMDU4MDQwNH0._9bFUxdarpZeOHdbGNE0oEL8sWSyVBmjM6WuVhNSOwg")
+const $=id=>document.getElementById(id)
+function popup(m,err=false){$("popupText").textContent=m;$("popup").style.borderColor=err?"rgba(255,90,90,0.4)":"rgba(255,215,0,0.3)";$("popup").classList.add("show");setTimeout(()=>$("popup").classList.remove("show"),3000)}
+function getRatingColor(r){if(r>=90)return"#FFD700";if(r>=87)return"#FFC107";if(r>=82)return"#9C27B0";if(r>=75)return"#2196F3";if(r>=65)return"#4CAF50";return"#9e9e9e"}
+let confirmResolve=null
+function stylishConfirm(title,msg){return new Promise(res=>{confirmResolve=res;$("confirmTitle").textContent=title;$("confirmMsg").textContent=msg;$("confirmBg").classList.add("show")})}
+window.closeConfirm=(ok)=>{$("confirmBg").classList.remove("show");if(confirmResolve)confirmResolve(ok);confirmResolve=null}
+$("confirmYesBtn").onclick=()=>closeConfirm(true)
+
+const FORMATIONS = {
+  "4-3-3": [{pos:"GK",x:50,y:88},{pos:"LB",x:15,y:68},{pos:"CB",x:37,y:70},{pos:"CB",x:63,y:70},{pos:"RB",x:85,y:68},{pos:"CMF",x:25,y:45},{pos:"CMF",x:50,y:42},{pos:"CMF",x:75,y:45},{pos:"LWF",x:15,y:18},{pos:"CF",x:50,y:12},{pos:"RWF",x:85,y:18}],
+  "4-4-2": [{pos:"GK",x:50,y:88},{pos:"LB",x:15,y:68},{pos:"CB",x:37,y:70},{pos:"CB",x:63,y:70},{pos:"RB",x:85,y:68},{pos:"LMF",x:15,y:42},{pos:"CMF",x:38,y:45},{pos:"CMF",x:62,y:45},{pos:"RMF",x:85,y:42},{pos:"CF",x:35,y:15},{pos:"CF",x:65,y:15}],
+  "3-5-2": [{pos:"GK",x:50,y:88},{pos:"CB",x:20,y:68},{pos:"CB",x:50,y:70},{pos:"CB",x:80,y:68},{pos:"LMF",x:12,y:42},{pos:"CMF",x:32,y:45},{pos:"DMF",x:50,y:55},{pos:"CMF",x:68,y:45},{pos:"RMF",x:88,y:42},{pos:"CF",x:35,y:15},{pos:"CF",x:65,y:15}],
+  "4-2-3-1": [{pos:"GK",x:50,y:88},{pos:"LB",x:15,y:68},{pos:"CB",x:37,y:70},{pos:"CB",x:63,y:70},{pos:"RB",x:85,y:68},{pos:"DMF",x:35,y:52},{pos:"DMF",x:65,y:52},{pos:"LMF",x:20,y:30},{pos:"AMF",x:50,y:28},{pos:"RMF",x:80,y:30},{pos:"CF",x:50,y:10}],
+  "4-1-4-1": [{pos:"GK",x:50,y:88},{pos:"LB",x:15,y:68},{pos:"CB",x:37,y:70},{pos:"CB",x:63,y:70},{pos:"RB",x:85,y:68},{pos:"DMF",x:50,y:58},{pos:"LMF",x:18,y:38},{pos:"CMF",x:38,y:35},{pos:"CMF",x:62,y:35},{pos:"RMF",x:82,y:38},{pos:"CF",x:50,y:10}],
+  "3-4-3": [{pos:"GK",x:50,y:88},{pos:"CB",x:20,y:68},{pos:"CB",x:50,y:70},{pos:"CB",x:80,y:68},{pos:"LMF",x:15,y:42},{pos:"CMF",x:40,y:45},{pos:"CMF",x:60,y:45},{pos:"RMF",x:85,y:42},{pos:"LWF",x:15,y:15},{pos:"CF",x:50,y:10},{pos:"RWF",x:85,y:15}],
+  "5-3-2": [{pos:"GK",x:50,y:88},{pos:"LB",x:10,y:68},{pos:"CB",x:30,y:70},{pos:"CB",x:50,y:72},{pos:"CB",x:70,y:70},{pos:"RB",x:90,y:68},{pos:"CMF",x:25,y:42},{pos:"CMF",x:50,y:38},{pos:"CMF",x:75,y:42},{pos:"CF",x:35,y:12},{pos:"CF",x:65,y:12}],
+  "4-5-1": [{pos:"GK",x:50,y:88},{pos:"LB",x:15,y:68},{pos:"CB",x:37,y:70},{pos:"CB",x:63,y:70},{pos:"RB",x:85,y:68},{pos:"LMF",x:10,y:40},{pos:"CMF",x:32,y:45},{pos:"CMF",x:50,y:42},{pos:"CMF",x:68,y:45},{pos:"RMF",x:90,y:40},{pos:"CF",x:50,y:12}]
+}
+
+let selectedFormation="4-3-3", selectedFormationId=null, selectedPlayer=null, assignments={}, subAssignments={}, currentMode="XI"
+function isPlayerUsed(playerId){return Object.values(assignments).some(p=>p.id===playerId) || Object.values(subAssignments).some(p=>p.id===playerId)}
+function updateUsedState(){ document.querySelectorAll(".drag-card").forEach(card=>{ if(isPlayerUsed(card.dataset.id)) card.classList.add("used"); else card.classList.remove("used") }) }
+
+async function loadPending(){
+  const {data}=await supabase.from("players").select("*").eq("status","pending").order("created_at",{ascending:false})
+  $("pendingList").innerHTML=data?.length?data.map(p=>`<div class="glass-card approve-card"><img src="${p.photo_url}"><div style="flex:1"><div style="font-weight:700;font-size:13px">${p.football_name} • #${p.jersey_number}</div><div style="font-size:11px;opacity:.6">${p.first_name} • ${p.sub_position}</div><div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-gold" onclick="approvePlayer('${p.id}')">Approve</button><button class="btn btn-red" onclick="rejectPlayer('${p.id}')">Reject</button></div></div></div>`).join(""):`<div style="opacity:.4;text-align:center;padding:20px">No pending</div>`
+  $("statPending").textContent=data?.length||0
+}
+window.approvePlayer=async(id)=>{await supabase.from("players").update({status:"approved"}).eq("id",id);popup("Approved");loadPending();loadApproved()}
+window.rejectPlayer=async(id)=>{await supabase.from("players").update({status:"rejected"}).eq("id",id);popup("Rejected",true);loadPending()}
+
+async function loadAnnouncements(){
+  const {data}=await supabase.from("announcements").select("*").order("created_at",{ascending:false})
+  $("announceList").innerHTML=data?.map(a=>`<div class="glass-card" style="display:flex;justify-content:space-between"><div style="font-size:13px;flex:1">${a.message}</div><button class="btn btn-red" onclick="deleteAnnounce('${a.id}')">Delete</button></div>`).join("")||""
+}
+window.deleteAnnounce=async(id)=>{if(!await stylishConfirm("Delete Announcement","This will remove the announcement for all players."))return;await supabase.from("announcements").delete().eq("id",id);loadAnnouncements();popup("Deleted")}
+$("postAnnounce").onclick=async()=>{
+  const msg=$("announceInput").value.trim()
+  if(!msg) return popup("Enter message",true)
+  const {data:ex}=await supabase.from("announcements").select("id")
+  if(ex && ex.length>=1) return popup("Delete existing announcement first",true)
+  await supabase.from("announcements").insert({message:msg});$("announceInput").value="";loadAnnouncements();popup("Posted")
+}
+
+async function loadApproved(){
+  const {data}=await supabase.from("players").select("*").eq("status","approved").eq("is_admin",false).order("rating",{ascending:false})
+  $("statApproved").textContent=data?.length||0
+  $("totalBadge").textContent=data?.length||0
+  $("ratingList").innerHTML=data?.map(p=>{
+    const col=getRatingColor(p.rating)
+    return `<div class="glass-card">
+      <div style="display:flex;gap:10px;align-items:center"><img src="${p.photo_url}" style="width:44px;height:44px;border-radius:50%;border:2px solid ${col}"><div style="flex:1"><b style="font-size:13px">${p.football_name} #${p.jersey_number}</b><div style="font-size:11px;opacity:.6">${p.sub_position}</div></div><div style="padding:4px 10px;border-radius:100px;background:${col};color:#000;font-weight:800">${p.rating}</div></div>
+      <input type="range" min="50" max="99" value="${p.rating}" class="rating-slider" style="width:100%;margin-top:10px" onchange="updateRating('${p.id}',this.value)">
+      <div class="jersey-row"><span style="font-size:11px;opacity:.6">JERSEY #</span><input class="jersey-input" id="jersey-${p.id}" type="number" min="1" max="99" value="${p.jersey_number}"><button class="btn btn-gold" style="padding:8px 14px;font-size:11px" onclick="updateJersey('${p.id}')">Update #</button><span style="font-size:10px;opacity:.5">Only number</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px"><button class="btn btn-dark" style="padding:6px 10px;font-size:11px" onclick="toggleInjury('${p.id}',${!p.is_injured})">${p.is_injured?"Set Fit":"Injure"}</button><span style="font-size:11px;opacity:.6">${p.is_injured?"Injured":"Fit"}</span></div>
+    </div>`
+  }).join("")||""
+  $("dragPlayers").innerHTML=data?.map(p=>`<div class="drag-card" data-id="${p.id}" data-name="${p.football_name}" data-photo="${p.photo_url}"><img src="${p.photo_url}"><div><div style="font-size:12px;font-weight:700">${p.football_name} #${p.jersey_number}</div><div style="font-size:10px;opacity:.6">${p.sub_position}</div></div></div>`).join("")||""
+  document.querySelectorAll(".drag-card").forEach(c=>{
+    c.onclick=()=>{
+      if(c.classList.contains("used")) return popup("Player already placed - remove him from board/bench first",true)
+      document.querySelectorAll(".drag-card").forEach(x=>x.classList.remove("selected"))
+      c.classList.add("selected")
+      selectedPlayer={id:c.dataset.id,name:c.dataset.name,photo:c.dataset.photo}
+      $("selectedPlayerInfo").style.display="flex"
+      $("selImg").src=c.dataset.photo
+      $("selName").textContent=`Selected: ${c.dataset.name} → Now tap ${currentMode} placeholder`
+      popup(`Selected ${c.dataset.name} - tap ${currentMode}`)
+    }
+  })
+  updateUsedState()
+}
+window.updateRating=async(id,val)=>{await supabase.from("players").update({rating:parseInt(val)}).eq("id",id);popup("Rating "+val)}
+window.toggleInjury=async(id,inj)=>{await supabase.from("players").update({is_injured:inj}).eq("id",id);loadApproved();popup(inj?"Injured":"Fit")}
+window.updateJersey=async(id)=>{
+  const input=$("jersey-"+id); const num=parseInt(input.value)
+  if(!num || num<1 || num>99) return popup("Number must be 1-99",true)
+  const {data:dup}=await supabase.from("players").select("id").eq("jersey_number",num).neq("id",id).eq("status","approved")
+  if(dup && dup.length>0){return popup("Jersey #"+num+" already taken!",true)}
+  const {error}=await supabase.from("players").update({jersey_number:num}).eq("id",id)
+  if(!error){popup("Jersey updated to #"+num);loadApproved()} else popup(error.message,true)
+}
+
+function renderPlaceholders(){
+  const board=$("formationBoard"); board.innerHTML=""
+  const slots=FORMATIONS[selectedFormation]||FORMATIONS["4-3-3"]
+  slots.forEach((slot,idx)=>{
+    const div=document.createElement("div"); div.className="placeholder"; div.style.left=slot.x+"%"; div.style.top=slot.y+"%"
+    const a=assignments[idx]
+    div.innerHTML=`<div class="placeholder-circle ${a?'filled':''}">${a?`<img src="${a.photo}">`:`<span style="font-size:10px;opacity:.7">${slot.pos}</span>`}</div><div class="placeholder-label">${a?a.name:slot.pos}</div>`
+    div.onclick=async()=>{
+      if(currentMode!=="XI"){popup("Switch to XI mode to place starters",true);return}
+      if(!selectedPlayer &&!a) return popup("Select a player first",true)
+      if(a &&!selectedPlayer){
+        if(!await stylishConfirm("Remove Player",`Remove ${a.name} from ${slot.pos}?`))return
+        if(selectedFormationId){await supabase.from("lineup").delete().eq("formation_id",selectedFormationId).eq("player_id",a.id)}
+        delete assignments[idx]; renderPlaceholders(); renderSubs(); updateUsedState(); popup("Removed "+a.name)
+        return
+      }
+      if(selectedPlayer){
+        if(isPlayerUsed(selectedPlayer.id)){return popup("Player already used elsewhere",true)}
+        assignments[idx]=selectedPlayer; selectedPlayer=null
+        document.querySelectorAll(".drag-card").forEach(x=>x.classList.remove("selected")); $("selectedPlayerInfo").style.display="none"
+        renderPlaceholders(); updateUsedState(); popup(`${assignments[idx].name} → ${slot.pos}`)
+      }
+    }
+    board.appendChild(div)
+  })
+}
+function renderSubs(){
+  const bench=$("subsBench"); bench.innerHTML=""
+  for(let i=0;i<7;i++){
+    const a=subAssignments[i]
+    const div=document.createElement("div"); div.className=`sub-slot ${a?'filled':''}`
+    div.innerHTML=a?`<img src="${a.photo}"><div style="font-size:9px;font-weight:700">${a.name}</div><div style="font-size:8px;opacity:.6">SUB${i+1}</div>`:`<div style="font-size:18px;opacity:.4">+</div><div style="font-size:9px;font-weight:700">SUB${i+1}</div>`
+    div.onclick=async()=>{
+      if(!selectedPlayer &&!a) {popup("Select player first",true);return}
+      if(a &&!selectedPlayer){
+        if(!await stylishConfirm("Remove Sub","Remove "+a.name+" from SUB"+(i+1)+"?"))return
+        if(selectedFormationId){await supabase.from("lineup").delete().eq("formation_id",selectedFormationId).eq("player_id",a.id)}
+        delete subAssignments[i]; renderSubs(); updateUsedState(); popup("Removed sub "+a.name); return
+      }
+      if(selectedPlayer){
+        if(isPlayerUsed(selectedPlayer.id)){return popup("Player already used",true)}
+        subAssignments[i]=selectedPlayer; selectedPlayer=null
+        document.querySelectorAll(".drag-card").forEach(x=>x.classList.remove("selected")); $("selectedPlayerInfo").style.display="none"
+        renderSubs(); updateUsedState(); popup(`${subAssignments[i].name} → SUB${i+1}`)
+      }
+    }
+    bench.appendChild(div)
+  }
+}
+async function loadFormations(){
+  const {data,error}=await supabase.from("formations").select("*").order("created_at")
+  if(error||!data?.length){popup("Run fix SQL - no formations",true);return}
+  $("formationDrop").innerHTML=data.map(f=>`<div class="select-option" data-name="${f.formation_name}" data-id="${f.id}">${f.formation_name}</div>`).join("")
+  $("formationDrop").querySelectorAll(".select-option").forEach(o=>{
+    o.onclick=()=>{
+      selectedFormation=o.dataset.name; selectedFormationId=o.dataset.id
+      $("formationText").textContent=o.dataset.name; $("formationText2").textContent=o.dataset.name
+      $("formationDrop").classList.remove("show"); assignments={}; subAssignments={}; renderPlaceholders(); renderSubs(); loadLineup(selectedFormationId)
+    }
+  })
+  const active=data.find(d=>d.is_active)||data[0]
+  selectedFormation=active.formation_name; selectedFormationId=active.id
+  $("formationText").textContent=active.formation_name; $("formationText2").textContent=active.formation_name
+  renderPlaceholders(); renderSubs(); loadLineup(active.id)
+}
+$("formationSelectBtn").onclick=(e)=>{e.stopPropagation();$("formationDrop").classList.toggle("show")}
+document.addEventListener("click",()=>{$("formationDrop").classList.remove("show")})
+$("modeXI").onclick=()=>{currentMode="XI";$("modeXI").classList.add("active");$("modeSUB").classList.remove("active");popup("XI mode - tap board")}
+$("modeSUB").onclick=()=>{currentMode="SUBS";$("modeSUB").classList.add("active");$("modeXI").classList.remove("active");popup("SUBS mode - tap bench")}
+async function loadLineup(fid){
+  if(!fid) return
+  const {data}=await supabase.from("lineup").select("*, players(*)").eq("formation_id",fid)
+  if(data && data.length){
+    assignments={}; subAssignments={}
+    const slots=FORMATIONS[selectedFormation]
+    let subIndex=0
+    data.forEach(l=>{
+      if(l.is_starter){
+        let best=0,dist=9999; slots.forEach((s,i)=>{const d=Math.hypot(s.x-l.pos_x,s.y-l.pos_y);if(d<dist){dist=d;best=i}})
+        assignments[best]={id:l.player_id,name:l.players?.football_name||"P",photo:l.players?.photo_url||""}
+      } else {
+        if(subIndex<7){subAssignments[subIndex]={id:l.player_id,name:l.players?.football_name||"P",photo:l.players?.photo_url||""}; subIndex++}
+      }
+    })
+    renderPlaceholders(); renderSubs(); updateUsedState()
+  } else {assignments={}; subAssignments={}; renderPlaceholders(); renderSubs(); updateUsedState()}
+}
+$("clearBoard").onclick=async()=>{
+  if(!selectedFormationId) return popup("Select formation first",true)
+  if(Object.keys(assignments).length===0 && Object.keys(subAssignments).length===0) return popup("Already empty",true)
+  if(!await stylishConfirm("Clear Board","Clear ALL XI + SUBS from "+selectedFormation+"? This deletes from database."))return
+  await supabase.from("lineup").delete().eq("formation_id",selectedFormationId)
+  assignments={}; subAssignments={}; renderPlaceholders(); renderSubs(); updateUsedState(); popup("Cleared XI + SUBS from DB")
+}
+$("saveLineup").onclick=async()=>{
+  if(!selectedFormationId) return popup("Select formation first",true)
+  if(Object.keys(assignments).length===0 && Object.keys(subAssignments).length===0) return popup("Assign players first",true)
+  popup("Saving XI + SUBS...")
+  await supabase.from("lineup").delete().eq("formation_id",selectedFormationId)
+  const slots=FORMATIONS[selectedFormation]
+  const inserts=[]
+  Object.entries(assignments).forEach(([idx,p])=>{inserts.push({formation_id:selectedFormationId,player_id:p.id,pos_x:slots[idx].x,pos_y:slots[idx].y,is_starter:true,position_label:slots[idx].pos})})
+  Object.entries(subAssignments).forEach(([idx,p])=>{inserts.push({formation_id:selectedFormationId,player_id:p.id,pos_x:10+parseInt(idx)*12,pos_y:95,is_starter:false,position_label:"SUB"+(parseInt(idx)+1)})})
+  const {error}=await supabase.from("lineup").insert(inserts)
+  if(!error){
+    await supabase.from("formations").update({is_active:false}).neq("id",selectedFormationId)
+    await supabase.from("formations").update({is_active:true}).eq("id",selectedFormationId)
+    popup(`Saved! XI:${Object.keys(assignments).length} SUBS:${Object.keys(subAssignments).length}`)
+  } else popup(error.message,true)
+}
+
+// ADMIN REALTIME + PUSH FOR NEW PENDING
+const adminChannel = supabase.channel('admin-pending-push')
+.on('postgres_changes', {event:'INSERT', schema:'public', table:'players'}, payload=>{
+    const p=payload.new
+    if(p.status==='pending'){
+      loadPending()
+      popup(`New registration: ${p.football_name}`)
+      // ADMIN PUSH NOTIFICATION
+      if(typeof adminPush==='function'){
+        adminPush(`New Registration: ${p.football_name}`, `${p.first_name} (${p.football_name}) #${p.jersey_number} - ${p.sub_position} - Waiting approval`)
+      }
+    }
+ })
+.on('postgres_changes', {event:'UPDATE', schema:'public', table:'players'}, ()=>{
+    loadPending(); loadApproved()
+ })
+.subscribe()
+
+loadPending();loadAnnouncements();loadApproved();loadFormations();renderPlaceholders();renderSubs()
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"))
+    document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"))
+    btn.classList.add("active")
+    $(btn.dataset.tab).classList.add("active")
+  }
+})
+</script>
+</body>
+</html>
